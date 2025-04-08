@@ -3,14 +3,18 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 import logging
+import torch
+import os
 
+print("Model exists:", os.path.exists("/app/best.pt"))
 app = FastAPI()
-model = YOLO("/app/best.pt")  # Load model
+torch.device('cpu')
+model = YOLO("/app/best.pt").to('cpu')
 
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):
     try:
-        # Verify image
+        # Verify image (FIXED: Added colon)
         if not file.content_type.startswith('image/'):
             raise HTTPException(400, "Only images allowed")
         
@@ -29,7 +33,7 @@ async def detect(file: UploadFile = File(...)):
                 detections.append({
                     "class": model.names[int(box.cls)],
                     "confidence": float(box.conf),
-                    "bbox": box.xyxy[0].tolist()  # [x1,y1,x2,y2]
+                    "bbox": box.xyxy[0].tolist()
                 })
         
         return {"detections": detections}

@@ -1,14 +1,11 @@
-# Base image (Python 3.9 + CUDA 11.8 for GPU support)
-FROM nvidia/cuda:11.8.0-base-ubuntu22.04
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    python3.10 \
-    python3-pip \
-    libgl1 \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.9-slim
 
 WORKDIR /app
+
+# Install system dependencies for OpenCV
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
 COPY requirements.txt .

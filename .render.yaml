@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: damage-detector
+    runtime: docker
+    plan: standard  # For GPU: use "performance"
+    env: python
+    build:
+      dockerfile: Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080

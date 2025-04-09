@@ -2,9 +2,4 @@ services:
   - type: web
     name: damage-detector
     runtime: python
-    plan: free  # or "standard" for more resources
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: PORT
-        value: 8080
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 30

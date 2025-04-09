@@ -3,12 +3,16 @@ from ultralytics import YOLO
 import numpy as np
 import cv2
 import os
+import torch
 
 app = FastAPI()
 
-# Load model (relative path)
+# Security fix for PyTorch 2.6+
+torch.serialization.add_safe_globals([YOLO])
+
+# Load model
 model_path = os.path.join(os.path.dirname(__file__), "best.pt")
-model = YOLO(model_path).to('cpu')  # Force CPU mode
+model = YOLO(model_path).to('cpu')
 
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):

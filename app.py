@@ -1,32 +1,27 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from ultralytics import YOLO
-import cv2
 import numpy as np
-import logging
-import torch
+import cv2
 import os
 
-print("Model exists:", os.path.exists("/app/best.pt"))
 app = FastAPI()
-torch.device('cpu')
-model = YOLO("/app/best.pt").to('cpu')
+
+# Load model (relative path)
+model_path = os.path.join(os.path.dirname(__file__), "best.pt")
+model = YOLO(model_path).to('cpu')  # Force CPU mode
 
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):
     try:
-        # Verify image (FIXED: Added colon)
         if not file.content_type.startswith('image/'):
             raise HTTPException(400, "Only images allowed")
         
-        # Read image
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
-        # Run detection
         results = model(img, verbose=False)
         
-        # Format response
         detections = []
         for result in results:
             for box in result.boxes:
@@ -39,5 +34,4 @@ async def detect(file: UploadFile = File(...)):
         return {"detections": detections}
 
     except Exception as e:
-        logging.error(f"Error: {str(e)}")
-        raise HTTPException(500, "Processing failed")
+        raise HTTPException(500, f"Processing failed: {str(e)}")
